@@ -2,11 +2,10 @@ package com.homeworkshop.newsappmvvm.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.homeworkshop.newsappmvvm.R
 import com.homeworkshop.newsappmvvm.adapters.NewsAdapter
@@ -19,7 +18,7 @@ import kotlinx.android.synthetic.main.fragment_breaking_news.*
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
     lateinit var viewModel: NewsViewModel
-    lateinit var newAdapter: NewsAdapter
+    lateinit var newsAdapter: NewsAdapter
 
     val TAG = "BreakingNewsFragment"
 
@@ -29,12 +28,22 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         viewModel = (activity as MainActivity).viewModel
         setupRecyclerView()
 
+        newsAdapter.setOnItemClickListener {
+            val bundle = Bundle().apply {
+                putSerializable("article",it)
+            }
+            findNavController().navigate(
+                R.id.action_breakingNewsFragment_to_articleFragment,
+                bundle
+            )
+        }
+
         viewModel.brekingNews.observe(viewLifecycleOwner, Observer {response ->
             when(response){
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newAdapter.differ.submitList(newsResponse.articles)
+                        newsAdapter.differ.submitList(newsResponse.articles)
                     }
                 }
                 is Resource.Error -> {
@@ -60,9 +69,9 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     }
 
     private fun setupRecyclerView() {
-       newAdapter = NewsAdapter()
+       newsAdapter = NewsAdapter()
         rvBreakingNews.apply {
-            adapter = newAdapter
+            adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
         }
     }

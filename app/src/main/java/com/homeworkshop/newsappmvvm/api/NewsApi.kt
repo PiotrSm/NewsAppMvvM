@@ -24,8 +24,6 @@ interface NewsApi {
             searchQuery:String,
             @Query("page")
             pageNumber :Int = 1,
-            @Query("country")
-            countryCode:String = "pl",
             @Query("apiKey")
             apiKey:String = NEWS_API_KEY
     ) : Response<NewsResponse>

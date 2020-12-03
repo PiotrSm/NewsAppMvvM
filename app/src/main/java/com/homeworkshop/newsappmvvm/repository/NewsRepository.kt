@@ -3,6 +3,7 @@ package com.homeworkshop.newsappmvvm.repository
 import androidx.lifecycle.ViewModel
 import com.homeworkshop.newsappmvvm.api.RetrofitInstance
 import com.homeworkshop.newsappmvvm.db.ArticleDatabase
+import com.homeworkshop.newsappmvvm.models.Article
 import retrofit2.Retrofit
 
 class NewsRepository(
@@ -16,4 +17,10 @@ class NewsRepository(
 
     suspend fun searchNews(searchQuery:String, pageNumber: Int)=
             RetrofitInstance.api.searchForNews(searchQuery,pageNumber)
+
+    suspend fun upsert(article: Article) = db.getArticleDao().upsert(article)
+
+    fun getSavedNews() = db.getArticleDao().getAllArticles()
+
+    suspend fun deleteArticle(article: Article) = db.getArticleDao().delete(article)
 }
