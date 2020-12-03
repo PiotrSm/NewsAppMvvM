@@ -1,5 +1,6 @@
 package com.homeworkshop.newsappmvvm.ui
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,13 +15,17 @@ class NewsViewModel(
         val repository: NewsRepository
 ) : ViewModel() {
     val brekingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    val breakingNewsPage = 1
+    var breakingNewsPage = 1
+    var breakingNewsResponse: NewsResponse? = null
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
-    val searchNewsPage = 1
+    var searchNewsPage = 1
+    var searchNewsResponse: NewsResponse? = null
+
+    val TAG = "NewsViewModel"
 
     init {
-        getBreakingNews("pl")
+        getBreakingNews("us")
     }
 
     //funkcja wyłouje funkcję wątkową dlatego też musi działać w wątku
@@ -33,7 +38,15 @@ class NewsViewModel(
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>) : Resource<NewsResponse>{
         if(response.isSuccessful){
             response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
+                breakingNewsPage++
+                if(breakingNewsResponse==null){
+                    breakingNewsResponse = resultResponse
+                }else{
+                    val newArticles = resultResponse.articles
+                    breakingNewsResponse?.articles?.addAll(newArticles)
+                }
+                Log.d(TAG,"breakingNewsResponseList : ${breakingNewsResponse?.articles?.size}")
+                return Resource.Success(breakingNewsResponse ?:resultResponse)
             }
         }
         return Resource.Error(response.message())
@@ -48,7 +61,15 @@ class NewsViewModel(
     private fun handleSearchNewsResponse(response: Response<NewsResponse>) : Resource<NewsResponse>{
         if(response.isSuccessful){
             response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
+                searchNewsPage++
+                if(searchNewsResponse==null){
+                    searchNewsResponse = resultResponse
+                }else{
+                    val newArticles = resultResponse.articles
+                    searchNewsResponse?.articles?.addAll(newArticles)
+                }
+                Log.d(TAG,"searchNewsResponseList : ${searchNewsResponse?.articles?.size}")
+                return Resource.Success(searchNewsResponse ?:resultResponse)
             }
         }
         return Resource.Error(response.message())
